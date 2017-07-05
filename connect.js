@@ -83,14 +83,14 @@ const wrap = (Wrapped, module, logger) => {
       this.logger = logger;
       Wrapper.logger = logger;
 
-      this.resources = []; // references to a subset of class-level resources
+      // this.resources = []; // references to a subset of class-level resources
       _.forOwn(Wrapped.manifest, (query, name) => {
         if (!name.startsWith('@')) {
           // Regular manifest entries describe resources
           // XXX Avoid creating a duplicate instance if we already have one
           const resource = new types[query.type || defaultType](name, query, module, logger);
           resources.push(resource);
-          this.resources.push(resource);
+          // this.resources.push(resource);
         } else if (name === '@errorHandler') {
           // XXX It doesn't really make sense to do this for each instance in the class
           setErrorHandler(query);
@@ -105,7 +105,7 @@ const wrap = (Wrapped, module, logger) => {
       if (!(this.context.addReducer)) {
         throw new Error('No addReducer function available in component context');
       }
-      this.resources.forEach((resource) => {
+      resources.forEach((resource) => {
         // Hopefully paging can all be absorbed into the resource in some future
         // rearchitecting (we might also reiterate these function definitions a
         // few million less times)
