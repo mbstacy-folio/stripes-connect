@@ -98,6 +98,7 @@ const wrap = (Wrapped, module, logger) => {
           console.log(`WARNING: ${module} ignoring unsupported special manifest entry '${name}'`);
         }
       });
+      logger.log('connect-lifecycle', `constructed <${Wrapped.name}>, resources =`, resources);
     }
 
     componentWillMount() {
@@ -189,6 +190,7 @@ const wrap = (Wrapped, module, logger) => {
 
   Wrapper.mapState = (state) => {
     const data = {};
+    logger.log('connect-lifecycle', `mapState for <${Wrapped.name}>, resources =`, resources);
     for (const r of resources) {
       data[r.name] = Object.freeze(_.get(state, [r.stateKey()], null));
     }
@@ -212,11 +214,13 @@ const wrap = (Wrapped, module, logger) => {
   // use it to do the real dispatch-mapping.
   //
   Wrapper.mapDispatch = (dispatch, ownProps) => {
+    logger.log('connect-lifecycle', `mapDispatch for <${Wrapped.name}>, resources =`, resources);
     return { dispatch };
   };
 
   Wrapper.mergeProps = (stateProps, dispatchProps, ownProps) => {
     const dispatch = dispatchProps.dispatch;
+    logger.log('connect-lifecycle', `mergeProps for <${Wrapped.name}>, resources =`, resources);
     const res = {};
 
     res.mutator = {};
