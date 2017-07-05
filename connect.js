@@ -23,18 +23,7 @@ const wrap = (Wrapped, module, logger) => {
     }
   }
 
-  const resources = [];
-  _.forOwn(Wrapped.manifest, (query, name) => {
-    if (!name.startsWith('@')) {
-      // Regular manifest entries describe resources
-      const resource = new types[query.type || defaultType](name, query, module, logger);
-      resources.push(resource);
-    } else if (name === '@errorHandler') {
-      setErrorHandler(query);
-    } else {
-      console.log(`WARNING: ${module} ignoring unsupported special manifest entry '${name}'`);
-    }
-  });
+  const allResources = [];
 
   function errorReducer(state = [], action) {
     // Handle error actions. I'm not sure how I feel about dispatching
@@ -93,6 +82,21 @@ const wrap = (Wrapped, module, logger) => {
       this.context = context;
       this.logger = logger;
       Wrapper.logger = logger;
+
+      this.resources = [];
+      _.forOwn(Wrapped.manifest, (query, name) => {
+        if (!name.startsWith('@')) {
+          // Regular manifest entries describe resources
+          const resource = new types[query.type || defaultType](name, query, module, logger);
+          this.resources.push(resource); // XXX not 100% sure we need this
+          allResouces.resources.push(resource);
+        } else if (name === '@errorHandler') {
+          // XXX It doesn't really make sense to do this for each instance in the class
+          setErrorHandler(query);
+        } else {
+          console.log(`WARNING: ${module} ignoring unsupported special manifest entry '${name}'`);
+        }
+      });
     }
 
     componentWillMount() {
@@ -100,7 +104,7 @@ const wrap = (Wrapped, module, logger) => {
       if (!(this.context.addReducer)) {
         throw new Error('No addReducer function available in component context');
       }
-      resources.forEach((resource) => {
+      this.resources.forEach((resource) => {
         // Hopefully paging can all be absorbed into the resource in some future
         // rearchitecting (we might also reiterate these function definitions a
         // few million less times)
@@ -183,16 +187,15 @@ const wrap = (Wrapped, module, logger) => {
   };
 
   Wrapper.mapState = (state) => {
-    const newProps = {
-      data: Object.freeze(resources.reduce((result, resource) => ({
+    const newProps = {};
+    newProps.data = Object.freeze(resources.reduce((result, resource) => ({
         ...result,
-        [resource.name]: Object.freeze(_.get(state, [resource.stateKey()], null)),
-      }), {})),
-      resources: Object.freeze(resources.reduce((result, resource) => ({
+      [resource.name]: Object.freeze(_.get(state, [resource.stateKey()], null)),
+    }), {}));
+    newProps.resources = Object.freeze(resources.reduce((result, resource) => ({
         ...result,
-        [resource.name]: Object.freeze(_.get(state, [`${resource.stateKey()}111`], null)),
-      }), {})),
-    };
+      [resource.name]: Object.freeze(_.get(state, [`${resource.stateKey()}111`], null)),
+    }), {}));
     // TODO Generalise this into a pass-through option on connectFor
     if (typeof state.okapi === 'object') newProps.okapi = state.okapi;
     return newProps;
