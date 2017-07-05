@@ -205,7 +205,18 @@ const wrap = (Wrapped, module, logger) => {
     return newProps;
   };
 
+  // This seems to get called only _before_ the constructor, so does
+  // not see the resources that have been added at construction. So
+  // all we do is stash the dispatch function, and leave the
+  // mergeProps function (which gets called after each mapState) to
+  // use it to do the real dispatch-mapping.
+  //
   Wrapper.mapDispatch = (dispatch, ownProps) => {
+    return { dispatch };
+  };
+
+  Wrapper.mergeProps = (stateProps, dispatchProps, ownProps) => {
+    const dispatch = dispatchProps.dispatch;
     const res = {};
 
     res.mutator = {};
@@ -221,7 +232,8 @@ const wrap = (Wrapped, module, logger) => {
         }
       });
     };
-    return res;
+
+    return Object.assign({}, ownProps, stateProps, res);
   };
 
   return Wrapper;
@@ -240,7 +252,7 @@ export const connect = (Component, module, loggerArg) => {
   }
   logger.log('connect', `connecting <${Component.name}> for '${module}'`);
   const Wrapper = wrap(Component, module, logger);
-  const Connected = reduxConnect(Wrapper.mapState, Wrapper.mapDispatch)(Wrapper);
+  const Connected = reduxConnect(Wrapper.mapState, Wrapper.mapDispatch, Wrapper.mergeProps)(Wrapper);
   return Connected;
 };
 
