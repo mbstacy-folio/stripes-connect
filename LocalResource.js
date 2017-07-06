@@ -5,6 +5,7 @@ export default class LocalResource {
     this.module = module;
     this.logger = logger; // not presently needed, but may be down the line
     this.query = query;
+    this.dataKey = dataKey;
     this.reducer111 = this.reducer;
   }
 
@@ -25,6 +26,7 @@ export default class LocalResource {
     meta: {
       module: this.module,
       resource: this.name,
+      dataKey: this.dataKey,
     },
   })
 
@@ -34,14 +36,15 @@ export default class LocalResource {
     meta: {
       module: this.module,
       resource: this.name,
+      dataKey: this.dataKey,
     },
   })
 
-  stateKey = () => `${this.module}-${this.name}`;
+  stateKey = () => `${this.module}-${this.name}${this.dataKey ? `-${this.dataKey}` : ''}`;
 
   actionApplies = (action) => {
     if (action.meta && action.meta.module && action.meta.resource) {
-      const key = `${action.meta.module}-${action.meta.resource}`;
+      const key = `${action.meta.module}-${action.meta.resource}${action.meta.dataKey ? `-${action.meta.dataKey}` : ''}`;
       return key === this.stateKey();
     }
     return false;
