@@ -76,6 +76,7 @@ const wrap = (Wrapped, module, logger) => {
         // state: null
       }),
       data: React.PropTypes.object, // eslint-disable-line react/forbid-prop-types
+      dataKey: React.PropTypes.string,
     };
 
     constructor(props, context) {
@@ -216,7 +217,7 @@ const wrap = (Wrapped, module, logger) => {
   // mergeProps function (which gets called after each mapState) to
   // use it to do the real dispatch-mapping.
   //
-  Wrapper.mapDispatch = (dispatch, ownProps) => {
+  Wrapper.mapDispatch = (dispatch) => {
     logger.log('connect-lifecycle', `mapDispatch for <${Wrapped.name}>, resources =`, resources);
     return { dispatch };
   };
