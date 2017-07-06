@@ -24,6 +24,7 @@ const wrap = (Wrapped, module, logger) => {
   }
 
   const resources = [];
+  const resourceRegister = {}; // map of resource names to resource objects
 
   function errorReducer(state = [], action) {
     // Handle error actions. I'm not sure how I feel about dispatching
@@ -87,10 +88,12 @@ const wrap = (Wrapped, module, logger) => {
       _.forOwn(Wrapped.manifest, (query, name) => {
         if (!name.startsWith('@')) {
           // Regular manifest entries describe resources
-          // XXX Avoid creating a duplicate instance if we already have one
-          const resource = new types[query.type || defaultType](name, query, module, logger);
-          resources.push(resource);
-          // this.resources.push(resource);
+          if (!resourceRegister[name]) {
+            const resource = new types[query.type || defaultType](name, query, module, logger);
+            resources.push(resource);
+            resourceRegister[name] = resource;
+            // this.resources.push(resource);
+          }
         } else if (name === '@errorHandler') {
           // XXX It doesn't really make sense to do this for each instance in the class
           setErrorHandler(query);
