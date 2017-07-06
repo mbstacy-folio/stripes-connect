@@ -191,6 +191,7 @@ export default class RESTResource {
     this.name = name;
     this.module = module;
     this.logger = logger;
+    this.dataKey = dataKey;
     this.crudName = module ? `${_.snakeCase(module)}_${_.snakeCase(name)}` : _.snakeCase(name);
     this.optionsTemplate = _.merge({}, defaults, query);
     this.crudActions = crud.actionCreatorsFor(this.crudName);
@@ -257,6 +258,7 @@ export default class RESTResource {
   }
 
   reducer(state = [], action) {
+    // console.log(`RESTResource reducer for '${this.stateKey()}': meta =`, action.meta, action);
     switch (action.type) {
       case `${this.stateKey().toUpperCase()}_FETCH_SUCCESS`: {
         if (Array.isArray(action.records)) return [...action.records];
@@ -349,7 +351,7 @@ export default class RESTResource {
   }
 
   stateKey() {
-    return this.crudName;
+    return `${this.crudName}${this.dataKey ? `-${this.dataKey}` : ''}`;
   }
 
   refresh(dispatch, props) {
