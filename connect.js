@@ -89,10 +89,12 @@ const wrap = (Wrapped, module, logger) => {
       _.forOwn(Wrapped.manifest, (query, name) => {
         if (!name.startsWith('@')) {
           // Regular manifest entries describe resources
-          if (!resourceRegister[name]) {
+          const dk = props.dataKey;
+          const dkName = `${name}${dk === undefined ? '' : `-${dk}`}`;
+          if (!resourceRegister[dkName]) {
             const resource = new types[query.type || defaultType](name, query, module, logger, props.dataKey);
             resources.push(resource);
-            resourceRegister[name] = resource;
+            resourceRegister[dkName] = resource;
             // this.resources.push(resource);
           }
         } else if (name === '@errorHandler') {
@@ -192,11 +194,13 @@ const wrap = (Wrapped, module, logger) => {
     store: React.PropTypes.object,
   };
 
-  Wrapper.mapState = (state) => {
+  Wrapper.mapState = (state, ownProps) => {
     const data = {};
     logger.log('connect-lifecycle', `mapState for <${Wrapped.name}>, resources =`, resources);
     for (const r of resources) {
-      data[r.name] = Object.freeze(_.get(state, [r.stateKey()], null));
+      if (r.dataKey === ownProps.dataKey) {
+        data[r.name] = Object.freeze(_.get(state, [r.stateKey()], null));
+      }
     }
 
     const resourceData = {};
@@ -229,7 +233,9 @@ const wrap = (Wrapped, module, logger) => {
 
     res.mutator = {};
     for (const r of resources) {
-      res.mutator[r.name] = r.getMutator(dispatch, ownProps);
+      if (r.dataKey === ownProps.dataKey) {
+        res.mutator[r.name] = r.getMutator(dispatch, ownProps);
+      }
     }
 
     res.refreshRemote = (params) => {
