@@ -89,7 +89,7 @@ const wrap = (Wrapped, module, logger) => {
         if (!name.startsWith('@')) {
           // Regular manifest entries describe resources
           if (!resourceRegister[name]) {
-            const resource = new types[query.type || defaultType](name, query, module, logger);
+            const resource = new types[query.type || defaultType](name, query, module, logger, props.dataKey);
             resources.push(resource);
             resourceRegister[name] = resource;
             // this.resources.push(resource);

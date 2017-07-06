@@ -1,6 +1,6 @@
 export default class LocalResource {
 
-  constructor(name, query = {}, module = null, logger) {
+  constructor(name, query = {}, module = null, logger, dataKey) {
     this.name = name;
     this.module = module;
     this.logger = logger; // not presently needed, but may be down the line

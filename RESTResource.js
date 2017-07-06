@@ -187,7 +187,7 @@ export function substitute(original, props, state, module, logger) {
 
 export default class RESTResource {
 
-  constructor(name, query = {}, module = null, logger, defaults = defaultDefaults) {
+  constructor(name, query = {}, module = null, logger, dataKey, defaults = defaultDefaults) {
     this.name = name;
     this.module = module;
     this.logger = logger;
