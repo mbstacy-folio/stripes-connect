@@ -3,6 +3,7 @@ import crud from 'redux-crud';
 import _ from 'lodash';
 import uuid from 'uuid';
 import queryString from 'query-string';
+import CrudActionsAugmenter from './CrudActionsAugmenter';
 
 const defaultDefaults = { pk: 'id', clientGeneratePk: true, fetch: true, clear: true };
 const initialResourceState = {
@@ -194,7 +195,7 @@ export default class RESTResource {
     this.dataKey = dataKey;
     this.crudName = module ? `${_.snakeCase(module)}_${_.snakeCase(name)}` : _.snakeCase(name);
     this.optionsTemplate = _.merge({}, defaults, query);
-    this.crudActions = crud.actionCreatorsFor(this.crudName);
+    this.crudActions = new CrudActionsAugmenter(dataKey, crud.actionCreatorsFor(this.crudName));
     this.pagedFetchSuccess = this.crudActions.fetchSuccess;
     this.crudReducers = crud.List.reducersFor(this.crudName,
       { key: this.optionsTemplate.pk, store: crud.STORE_MUTABLE });
