@@ -1,3 +1,5 @@
+/* eslint-env browser */
+
 export default class LocalResource {
 
   constructor(name, query = {}, module = null, logger, dataKey) {
@@ -50,19 +52,17 @@ export default class LocalResource {
     return false;
   }
 
-  newActionApplies = (action) => {
-    return (action.meta !== undefined &&
-            action.meta.module === this.module &&
-            action.meta.resource === this.name &&
-            action.meta.dataKey === this.dataKey);
-  }
+  newActionApplies = action => (action.meta !== undefined &&
+                                action.meta.module === this.module &&
+                                action.meta.resource === this.name &&
+                                action.meta.dataKey === this.dataKey);
 
   // I want to switch for the old actionApplies to the new, but for now will verify they really are equivalent
   actionApplies = (action) => {
     const oldRes = this.oldActionApplies(action);
     const newRes = this.newActionApplies(action);
     if (newRes !== oldRes) alert(`oldRes=${oldRes}, newRes=${newRes}`);
-    return oldRes
+    return oldRes;
   }
 
   reducer = (state = {}, action) => {
