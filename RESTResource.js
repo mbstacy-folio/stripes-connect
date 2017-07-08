@@ -84,15 +84,40 @@ function processFallback(s, getPath, props) {
   return res;
 }
 
+// Calculate what the props _would be_ if we went through
+// mapStateToProps. If dataKey is included, then we look only at state
+// pertaining to that data-key.
+//
 // If we restructure the state into a per-module hierarchy we
 // won't need to go through this dance STRIPES-238
-function mockProps(state, module) {
+function mockProps(state, module, dataKey) {
   const mock = { data: {} };
+  // console.log(` mockprops(${dataKey})`);
   Object.keys(state).forEach((key) => {
-    const re = new RegExp(`^${module}.(.*)`);
-    const res = re.exec(key);
-    if (Array.isArray(res) && res.length > 1) {
-      mock.data[res[1]] = state[key];
+    // console.log(`  considering ${key}`);
+    const a = key.split('#');
+    let rawKey;
+    if (a.length === 1) {
+      // No dataKey
+      // console.log('   no dataKey included');
+      if (!dataKey) rawKey = key;
+    } else {
+      // console.log(`   dataKey ${a[0]} included`);
+      if (a.length > 2) console.log(`state key '${key}' has multiple '#'`);
+      // 1st component is dataKey
+      if (dataKey && dataKey === a[0]) rawKey = a[1];
+    }
+
+    if (rawKey) {
+      // console.log(`    considering rawKey ${rawKey}`);
+      const re = new RegExp(`^${module}.(.*)`);
+      const res = re.exec(rawKey);
+      if (Array.isArray(res) && res.length > 1) {
+        mock.data[res[1]] = state[key];
+        // console.log(`     added mock[${res[1]}] = ${state[key]}`);
+      }
+    } else {
+      // console.log('    skipping');
     }
   });
   return mock;
@@ -148,7 +173,7 @@ export function substitute(original, props, state, module, logger) {
 
   if (typeof original === 'function') {
     // Call back to resource-specific code
-    result = original(parsedQuery, _.get(props, ['match', 'params']), mockProps(state, module).data, logger);
+    result = original(parsedQuery, _.get(props, ['match', 'params']), mockProps(state, module, props.dataKey).data, logger);
     dynamicPartsSatisfied = (result !== null);
   } else if (typeof original === 'string') {
     // eslint-disable-next-line consistent-return
@@ -165,7 +190,7 @@ export function substitute(original, props, state, module, logger) {
           return pathComp;
         }
         case '%': case '$': {
-          const localState = processFallback(name.split('.'), ['data'], mockProps(state, module));
+          const localState = processFallback(name.split('.'), ['data'], mockProps(state, module, props.dataKey));
           if (localState === null) dynamicPartsSatisfied = false;
           return localState;
         }
@@ -236,7 +261,7 @@ export default class RESTResource {
           substitute(param, props, state, this.module, this.logger));
       } else if (typeof options.params === 'function') {
         const parsedQuery = queryString.parse(_.get(props, ['location', 'search']));
-        options.params = options.params(parsedQuery, _.get(props, ['match', 'params']), mockProps(state, module).data, this.logger);
+        options.params = options.params(parsedQuery, _.get(props, ['match', 'params']), mockProps(state, module, props.dataKey).data, this.logger);
       }
 
       // recordsRequired
@@ -352,7 +377,7 @@ export default class RESTResource {
   }
 
   stateKey() {
-    return `${this.crudName}${this.dataKey ? `-${this.dataKey}` : ''}`;
+    return `${this.dataKey ? `${this.dataKey}#` : ''}${this.crudName}`;
   }
 
   refresh(dispatch, props) {
