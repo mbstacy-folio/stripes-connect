@@ -42,11 +42,11 @@ export default class LocalResource {
     },
   })
 
-  stateKey = () => `${this.module}-${this.name}${this.dataKey ? `-${this.dataKey}` : ''}`;
+  stateKey = () => `${this.dataKey ? `${this.dataKey}#` : ''}${this.module}-${this.name}`;
 
   oldActionApplies = (action) => {
     if (action.meta && action.meta.module && action.meta.resource) {
-      const key = `${action.meta.module}-${action.meta.resource}${action.meta.dataKey ? `-${action.meta.dataKey}` : ''}`;
+      const key = `${action.meta.dataKey ? `${action.meta.dataKey}#` : ''}${action.meta.module}-${action.meta.resource}`;
       return key === this.stateKey();
     }
     return false;
