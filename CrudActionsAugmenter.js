@@ -10,7 +10,7 @@ function CrudActionsAugmenter(dataKey, crudActions) {
 CrudActionsAugmenter.prototype.augmentWithDataKey = (crudActions, name, dataKey, arg1, arg2, arg3) => {
   if (!crudActions[name]) console.log(`CrudActionsAugmenter: no such function '${name}' in`, crudActions);
   const x = crudActions[name](arg1, arg2, arg3);
-  return Object.assign({}, x, { dataKey });
+  return Object.assign({}, x, { meta: Object.assign({}, x.meta, { dataKey }) });
 };
 
 export default CrudActionsAugmenter;
