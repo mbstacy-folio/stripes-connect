@@ -382,7 +382,7 @@ export default class RESTResource {
 
   refresh(dispatch, props) {
     if (this.optionsTemplate.fetch === false) return null;
-    return dispatch(this.fetchAction(props));
+    if (props.dataKey === this.dataKey) return dispatch(this.fetchAction(props));
   }
 
   createAction = (record, props) => {
