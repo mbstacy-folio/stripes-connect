@@ -220,7 +220,7 @@ export default class RESTResource {
     this.dataKey = dataKey;
     this.crudName = module ? `${_.snakeCase(module)}_${_.snakeCase(name)}` : _.snakeCase(name);
     this.optionsTemplate = _.merge({}, defaults, query);
-    this.crudActions = new CrudActionsAugmenter(dataKey, crud.actionCreatorsFor(this.crudName));
+    this.crudActions = new CrudActionsAugmenter(crud.actionCreatorsFor(this.crudName), dataKey);
     this.pagedFetchSuccess = this.crudActions.fetchSuccess;
     this.crudReducers = crud.List.reducersFor(this.crudName,
       { key: this.optionsTemplate.pk, store: crud.STORE_MUTABLE });

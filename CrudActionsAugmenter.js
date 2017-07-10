@@ -1,7 +1,7 @@
 // Provides a wrapper for crudActions that inserts `dataKey` into the
 // `meta` object of each action that is created.
 
-function CrudActionsAugmenter(dataKey, crudActions) {
+function CrudActionsAugmenter(crudActions, dataKey) {
   return new Proxy(this, {
     get: (receiver, name) => receiver.augmentWithDataKey.bind(receiver, crudActions, name, dataKey),
   });
