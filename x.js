@@ -395,12 +395,7 @@ export default class RESTResource {
 
   refresh(dispatch, props) {
     if (this.optionsTemplate.fetch === false) return;
-    if (props.dataKey === this.dataKey) {
-      console.log(`* refresh for dataKey '${this.dataKey}', props =`, props);
-      dispatch(this.fetchAction(props));
-    } else {
-      console.log(`* NO refresh for dataKey '${this.dataKey}', props =`, props);
-    }
+    if (props.dataKey === this.dataKey) dispatch(this.fetchAction(props));
   }
 
   createAction = (record, props) => {
