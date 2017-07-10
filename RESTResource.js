@@ -284,7 +284,9 @@ export default class RESTResource {
   }
 
   reducer(state = [], action) {
-    // console.log(`RESTResource reducer for '${this.stateKey()}': meta =`, action.meta, action);
+    const dataKey = action.meta ? action.meta.dataKey : undefined;
+    if (dataKey !== this.dataKey) return state;
+
     switch (action.type) {
       case `${this.stateKey().toUpperCase()}_FETCH_SUCCESS`: {
         if (Array.isArray(action.records)) return [...action.records];
