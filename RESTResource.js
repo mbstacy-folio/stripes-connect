@@ -151,7 +151,8 @@ function urlFromOptions(options, pk) {
 //
 //
 export function substitute(original, props, state, module, logger) {
-  const parsedQuery = queryString.parse(_.get(props, ['location', 'search']));
+
+  const parsedQuery = state.mockQuery ? state.mockQuery : queryString.parse(_.get(props, ['location', 'search']));
   let dynamicPartsSatisfied = true;
   let result;
 
